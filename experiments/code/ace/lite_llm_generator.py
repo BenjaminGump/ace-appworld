@@ -151,13 +151,31 @@ def non_cached_chat_completion(
         client = Together()
     elif provider.strip().lower() == "openai":
         from openai import OpenAI
-        client = OpenAI()
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
+    elif provider.strip().lower() == "openrouter":
+        from openai import OpenAI
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
     else:
         raise ValueError(
             f"Invalid provider: {provider}."
         )
 
-    response = client.chat.completions.create(**kwargs)
+    for attempt in range(1, 4):
+        try:
+            response = client.chat.completions.create(**kwargs)
+            if not response:
+                raise ValueError("Response is empty")
+            
+            break
+        except Exception as e:
+            print(f"[LLM CALL ATTEMPT {attempt}] Exception: {e}")
+            time.sleep(5)
     response = to_dict(response)
     return response
 
@@ -278,6 +296,9 @@ class LiteLLMGenerator:
             if "base_url" in generation_kwargs:
                 os.environ["OPENAI_BASE_URL"] = generation_kwargs.pop("base_url")
             generation_kwargs.pop("custom_llm_provider", None)
+        elif completion_method == "openrouter":
+            if "api_key" in generation_kwargs:
+                os.environ["OPENROUTER_API_KEY"] = generation_kwargs.pop("api_key")
         valid_generation_kwargs_keys = set(
             inspect.signature(CHAT_COMPLETION[completion_method]()).parameters.keys()
         )
@@ -330,7 +351,7 @@ class LiteLLMGenerator:
 
                     print(traceback.format_exc())
                     exit()
-                print(f"Encountered LM Error: {exception.message[:200].strip()}...")
+                print(f"Encountered LM Error: {str(exception)[:200].strip()}...")
                 print(f"Will try again in {self.retry_after_n_seconds} seconds.")
                 time.sleep(self.retry_after_n_seconds)
                 pass

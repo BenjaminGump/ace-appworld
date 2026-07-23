@@ -31,6 +31,14 @@ def run_experiment(
         if dataset_name is None:
             raise Exception("Either 'dataset' or 'task_ids' must be specified in the config")
         task_ids = load_task_ids(dataset_name)
+
+        import random
+        seed = 36
+        random.seed(seed)
+        random.shuffle(task_ids)
+
+        task_ids = task_ids[-73:]
+
         if sample_size is not None:
             task_ids = task_ids[:sample_size]
 

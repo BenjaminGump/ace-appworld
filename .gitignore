@@ -130,3 +130,4 @@ generate/tasks/task_generators/
 tests/package/apps
 tests/generation
 # !generate/data
+archive/
