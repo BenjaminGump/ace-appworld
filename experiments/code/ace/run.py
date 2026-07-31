@@ -37,7 +37,7 @@ def run_experiment(
         random.seed(seed)
         random.shuffle(task_ids)
 
-        task_ids = task_ids[-73:]
+        # task_ids = task_ids[-73:]
 
         if sample_size is not None:
             task_ids = task_ids[:sample_size]

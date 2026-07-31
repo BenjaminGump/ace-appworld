@@ -10,6 +10,49 @@ from appworld import AppWorld
 from appworld.common.utils import read_file
 from appworld_experiments.code.ace.evaluation_agent import Agent, ExecutionIO
 
+# Playbook and final-task query are appended as separate messages (rather than being
+# baked into the demo template) so the message structure mirrors vao's
+# ReActAgent.execute(): demo template -> key instructions -> retrieved playbook -> query.
+KEY_INSTRUCTIONS = """**Key instructions**:
+(1) Make sure to end code blocks with ``` followed by a newline(\\n).
+
+(2) Remember you can use the variables in your code in subsequent code blocks.
+
+(3) Remember that the email addresses, access tokens and variables (e.g. spotify_password) in the example above are not valid anymore.
+
+(4) You can use the "supervisor" app to get information about my accounts and use the "phone" app to get information about friends and family.
+
+(5) Always look at API specifications (using apis.api_docs.show_api_doc) before calling an API.
+
+(6) Write small chunks of code and only one chunk of code in every step. Make sure everything is working correctly before making any irreversible change.
+
+(7) Many APIs return items in "pages". Make sure to run through all the pages by looping over `page_index`.
+
+(8) Once you have completed the task, make sure to call apis.supervisor.complete_task(). If the task asked for some information, return it as the answer argument, i.e. call apis.supervisor.complete_task(answer=<answer>). Many tasks do not require an answer, so in those cases, just call apis.supervisor.complete_task() i.e. do not pass any argument.
+"""
+
+PLAYBOOK_PREAMBLE = (
+    "You are also provided with a curated playbook of strategies, API-specific information, "
+    "common mistakes, and proven solutions to help you solve the task effectively.\n\n"
+    "**Playbook**: - Read the **Playbook** first, then execute the task by explicitly leveraging each relevant section:\n"
+    "### PLAYBOOK BEGIN\n{playbook}\n### PLAYBOOK END"
+)
+
+
+def build_query_message(main_user, instruction: str) -> dict:
+    content = (
+        "Using these APIs and playbook, generate code to solve the actual task:\n\n"
+        f"My name is: {main_user.first_name} {main_user.last_name}. "
+        f"My personal email is {main_user.email} and phone number is {main_user.phone_number}.\n"
+        f"Task: {instruction}\n\n"
+    )
+    return {"role": "user", "content": content}
+
+
+def has_playbook(playbook: str | None) -> bool:
+    return bool(playbook and playbook.strip() and playbook.strip() != "(empty)")
+
+
 @Agent.register("ace_evaluation_react")
 class SimplifiedReActAgent(Agent):
     def __init__(
@@ -44,15 +87,18 @@ class SimplifiedReActAgent(Agent):
             indent=1,
         )
         template_params = {
-            "input_str": world.task.instruction,
             "main_user": world.task.supervisor,
             "app_descriptions": app_descriptions,
-            "relevant_apis": str(world.task.ground_truth.required_apis),
-            "playbook": self.playbook,
         }
         output_str = template.render(template_params)
         output_str = self.truncate_input(output_str) + "\n\n"
         self.messages = self.text_to_messages(output_str)
+        self.messages.append({"role": "user", "content": KEY_INSTRUCTIONS})
+        if has_playbook(self.playbook):
+            self.messages.append(
+                {"role": "user", "content": PLAYBOOK_PREAMBLE.format(playbook=self.playbook)}
+            )
+        self.messages.append(build_query_message(world.task.supervisor, world.task.instruction))
         self.num_instruction_messages = len(self.messages)
 
     def next_execution_inputs_and_cost(

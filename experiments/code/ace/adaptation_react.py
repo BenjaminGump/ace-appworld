@@ -9,6 +9,12 @@ from jinja2 import Template
 from appworld import AppWorld
 from appworld.common.utils import read_file
 from appworld_experiments.code.ace.adaptation_agent import StarAgent, ExecutionIO
+from appworld_experiments.code.ace.evaluation_react import (
+    KEY_INSTRUCTIONS,
+    PLAYBOOK_PREAMBLE,
+    build_query_message,
+    has_playbook,
+)
 from .playbook import apply_curator_operations, extract_json_from_text, get_next_global_id
 
 @StarAgent.register("ace_adaptation_react")
@@ -53,15 +59,18 @@ class SimplifiedReActStarAgent(StarAgent):
             indent=1,
         )
         template_params = {
-            "input_str": world.task.instruction,
             "main_user": world.task.supervisor,
             "app_descriptions": app_descriptions,
-            "relevant_apis": str(world.task.ground_truth.required_apis),
-            "playbook": self.playbook,
         }
         output_str = template.render(template_params)
         output_str = self.truncate_input(output_str) + "\n\n"
         self.messages = self.text_to_messages(output_str)
+        self.messages.append({"role": "user", "content": KEY_INSTRUCTIONS})
+        if has_playbook(self.playbook):
+            self.messages.append(
+                {"role": "user", "content": PLAYBOOK_PREAMBLE.format(playbook=self.playbook)}
+            )
+        self.messages.append(build_query_message(world.task.supervisor, world.task.instruction))
         self.num_instruction_messages = len(self.messages)
 
     def next_execution_inputs_and_cost(

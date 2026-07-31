@@ -5,7 +5,7 @@ local experiment_configs_path = project_home_path + "/experiments/configs";
 local experiment_code_path = project_home_path + "/experiments/code";
 
 local generator_model_config = {
-    "name": "glm-5.2",
+    "name": "qwen3.7-plus",
     "provider": "openai",
     "temperature": 0,
     "seed": 100,
@@ -35,7 +35,7 @@ local generator_model_config = {
                 "color": true,
                 "verbose": true,
             },
-            "generator_prompt_file_path": experiment_prompts_path + "/appworld_react_generator_prompt.txt",
+            "generator_prompt_file_path": experiment_prompts_path + "/appworld_react_generator_prompt_v2.txt",
             "trained_playbook_file_path": experiment_playbooks_path + "/appworld_final_playbook.txt",  
             "ignore_multiple_calls": true,
             "max_steps": 40,

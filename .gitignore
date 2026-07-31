@@ -131,3 +131,4 @@ tests/package/apps
 tests/generation
 # !generate/data
 archive/
+experiments/playbooks/*

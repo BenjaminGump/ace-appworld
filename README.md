@@ -57,10 +57,10 @@ export OPENAI_API_KEY=YOUR_API_KEY_HERE # export if necessary
 
 Under ```experiments/configs```, you can customize the experiment you'd like to run by adding new or editing existing ```.jsonnet``` config files, including choice of language models and API providers, sampling parameters, system prompts, etc.
 
-As an example, the following config snippet specifies that the reflector agent should use glm-5.2 as its language model, rely on the SambaNova API as the provider, and run with a sampling temperature of zero.
+As an example, the following config snippet specifies that the reflector agent should use qwen3.7-plus as its language model, rely on the SambaNova API as the provider, and run with a sampling temperature of zero.
 ```
 local reflector_model_config = {
-    "name": "glm-5.2",
+    "name": "qwen3.7-plus",
     "provider": "sambanova",
     "temperature": 0,
     ...
