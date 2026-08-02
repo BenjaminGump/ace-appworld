@@ -2,6 +2,7 @@
 [shr-00001] Make sure to end code blocks with ``` followed by a newline(\n).
 [shr-00005] Always look at API specifications (using apis.api_docs.show_api_doc) before calling an API.
 [shr-00006] Write small chunks of code and only one chunk of code in every step. Make sure everything is working correctly before making any irreversible change.
+[shr-00007] When calling apis.supervisor.complete_task(), only pass the `answer` argument if the task explicitly asks a question or requests a piece of information back. Do NOT pass `answer` "for completeness" or to summarize what you did — most action-only tasks (e.g. sending a payment, creating a post, updating a setting) expect no answer at all, and passing one when none is expected will fail grading even if the task itself was completed correctly. If in doubt whether the task expects an answer, re-read the instruction: if it's phrased as a request to do something (not asking "what"/"how many"/"which"), call complete_task() with no arguments.
 
 ## APIs TO USE FOR SPECIFIC INFORMATION
 [api-00004] You can use the "supervisor" app to get information about my accounts and use the "phone" app to get information about friends and family.
