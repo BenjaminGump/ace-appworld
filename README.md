@@ -141,10 +141,10 @@ The setup below is the currently tested local configuration for this repository.
 The tested environment is Windows + Conda + Python 3.11. On every new CMD/Anaconda Prompt session, run:
 
 ```bat
-cd /d C:\\gbz\\fucktest\\ace-appworld-git
+cd /d C:\gbz\fucktest\ace-appworld-git
 conda activate ace_env
-set APPWORLD_PROJECT_PATH=C:\gbzucktestce-appworld-git
-set APPWORLD_ROOT=C:\gbzucktestce-appworld-git
+set APPWORLD_PROJECT_PATH=%CD%
+set APPWORLD_ROOT=%CD%
 set PYTHONUTF8=1
 set "OPENAI_API_KEY=YOUR_OPENROUTER_KEY"
 set "REPO=C:/gbz/fucktest/ace-appworld-git"
@@ -187,7 +187,7 @@ The default upstream configuration still points to `appworld_initial_playbook.tx
 Use a separate smoke playbook so the test cannot contaminate the formal run:
 
 ```bat
-set "ACE_SMOKE_OVERRIDE={"config":{"agent":{"appworld_config":{"timeout_seconds":null},"initial_playbook_file_path":"%REPO%/experiments/playbooks/appworld_empty_playbook.txt","trained_playbook_file_path":"%REPO%/experiments/playbooks/appworld_smoke_playbook.txt","generator_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"},"reflector_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"},"curator_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"},"max_steps":3}}}}"
+set "ACE_SMOKE_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"initial_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_empty_playbook.txt\",\"trained_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_smoke_playbook.txt\",\"generator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"reflector_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"curator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"max_steps\":3}}}"
 appworld run ACE_offline_no_GT_adaptation --task-id 82e2fac_1 --override "%ACE_SMOKE_OVERRIDE%"
 ```
 
@@ -202,14 +202,16 @@ rmdir /s /q experiments\\outputs\\ACE_offline_no_GT_adaptation
 
 Before the formal run, make sure no old final playbook remains:
 
+Restore the tracked empty placeholder before starting a fresh formal adaptation run:
+
 ```bat
-if exist experiments\\playbooks\\appworld_final_playbook.txt (echo WARNING_FINAL_PLAYBOOK_EXISTS) else (echo CLEAN_FINAL_PLAYBOOK)
+git restore --source=HEAD --worktree experiments\playbooks\appworld_final_playbook.txt
 ```
 
 Set the formal override:
 
 ```bat
-set "ACE_OVERRIDE={"config":{"agent":{"appworld_config":{"timeout_seconds":null},"initial_playbook_file_path":"%REPO%/experiments/playbooks/appworld_empty_playbook.txt","generator_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"},"reflector_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"},"curator_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"}}}}"
+set "ACE_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"initial_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_empty_playbook.txt\",\"generator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"reflector_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"curator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"}}}}"
 ```
 
 Run the complete train split:
@@ -233,7 +235,7 @@ Do not delete this file after training; evaluation uses it.
 Evaluation uses the trained `appworld_final_playbook.txt`; it does not restart from the empty playbook and does not run reflector/curator adaptation.
 
 ```bat
-set "ACE_EVAL_OVERRIDE={"config":{"agent":{"appworld_config":{"timeout_seconds":null},"generator_model_config":{"name":"~deepseek/deepseek-v4-flash-latest"},"trained_playbook_file_path":"%REPO%/experiments/playbooks/appworld_final_playbook.txt"}}}}"
+set "ACE_EVAL_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"generator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"trained_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_final_playbook.txt\"}}}"
 appworld run ACE_offline_no_GT_evaluation --override "%ACE_EVAL_OVERRIDE%"
 appworld evaluate ACE_offline_no_GT_evaluation test_normal
 ```
