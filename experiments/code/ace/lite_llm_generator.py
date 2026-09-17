@@ -168,7 +168,10 @@ def non_cached_chat_completion(
 
     for attempt in range(1, 4):
         try:
+            print(f"[LLM REQUEST START] attempt={attempt} model={model} messages={len(messages)}", flush=True)
+            request_start = time.time()
             response = client.chat.completions.create(**kwargs)
+            print(f"[LLM REQUEST END] attempt={attempt} elapsed={time.time() - request_start:.1f}s", flush=True)
             if not response:
                 raise ValueError("Response is empty")
             
@@ -322,6 +325,7 @@ class LiteLLMGenerator:
         **kwargs: Any,
     ) -> dict[str, Any]:
         used_num_tokens = token_counter(model=self.model, messages=messages)
+        print(f"[LLM PROMPT] model={self.model} messages={len(messages)} tokens={used_num_tokens}", flush=True)
         if self.max_input_tokens and used_num_tokens > self.max_input_tokens:
             print(
                 "WARNING: Ran out of context limit of this model. "
