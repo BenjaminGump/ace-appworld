@@ -151,7 +151,7 @@ So the Spotify password is an entry in the `passwords` list with the account_nam
 
 ```python
 spotify_password = next(p["password"] for p in passwords if p["account_name"] == "spotify")
-login_result = apis.spotify.login(username='{{ supervisor.email }}', password=spotify_password)
+login_result = apis.spotify.login(username='{{ main_user.email }}', password=spotify_password)
 spotify_access_token = login_result["access_token"]
 print(login_result)
 ```

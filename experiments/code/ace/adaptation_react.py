@@ -253,7 +253,7 @@ class SimplifiedReActStarAgent(StarAgent):
             .replace("{{generated_rationale}}", "See full conversation history below")
             .replace("{{spec_or_api_docs}}", "See full conversation history below")
             .replace("{{execution_error}}", "See full conversation history below")
-            .replace("{{playbook}}", self.playbook or "N/A")
+            .replace("{{playbook}}", self.playbook if has_playbook(self.playbook) else "[]")
             .replace("{{previous_reflection}}", "N/A")
         )
         
@@ -284,7 +284,7 @@ class SimplifiedReActStarAgent(StarAgent):
         if self.use_reflector:
             reasoning_text = self.reflector_call()
         # Current playbook and question context
-        current_playbook = self.playbook or ""
+        current_playbook = self.playbook if has_playbook(self.playbook) else "[]"
         question_context = getattr(getattr(self, "world", None), "task", None)
         question_context = getattr(question_context, "instruction", "") if question_context else ""
 
@@ -300,7 +300,7 @@ class SimplifiedReActStarAgent(StarAgent):
             initial_generated_code="See full conversation history below",
             final_generated_code="See full conversation history below",
             guidebook=reasoning_text,
-            current_playbook=self.playbook,
+            current_playbook=current_playbook,
             question_context=question_context,
             gt=self.world_gt_code
         )

@@ -50,7 +50,12 @@ def build_query_message(main_user, instruction: str) -> dict:
 
 
 def has_playbook(playbook: str | None) -> bool:
-    return bool(playbook and playbook.strip() and playbook.strip() != "(empty)")
+    if not playbook:
+        return False
+    return any(
+        line.strip().startswith("[") and "]" in line
+        for line in playbook.splitlines()
+    )
 
 
 @Agent.register("ace_evaluation_react")
