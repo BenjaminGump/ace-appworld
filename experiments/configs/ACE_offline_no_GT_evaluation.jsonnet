@@ -5,8 +5,10 @@ local experiment_configs_path = project_home_path + "/experiments/configs";
 local experiment_code_path = project_home_path + "/experiments/code";
 
 local generator_model_config = {
-    "name": "qwen3.7-plus",
-    "provider": "openai",
+    "name": "deepseek-flash",
+    "provider": "deepseek",
+    "custom_llm_provider": "deepseek",
+    "thinking": {"type": "disabled"},
     "temperature": 0,
     "seed": 100,
     "stop": ["<|endoftext|>", "<|eot_id|>", "<|start_header_id|>"],
@@ -30,6 +32,7 @@ local generator_model_config = {
             "generator_model_config": generator_model_config,
             "appworld_config": {
                 "random_seed": 123,
+                "timeout_seconds": null,
             },
             "logger_config": {
                 "color": true,

@@ -67,7 +67,7 @@ def non_cached_chat_completion(
     n: int | None = None,
     parallel_tool_calls: bool | None = None,
     presence_penalty: float | None = None,
-    reasoning_effort: Literal["low", "medium", "high"] | None = None,
+    reasoning_effort: Literal["none", "low", "medium", "high"] | None = None,
     response_format: dict | None = None,
     seed: int | None = None,
     stop: str | list[str] | None = None,
@@ -104,8 +104,8 @@ def non_cached_chat_completion(
     #     kwargs["parallel_tool_calls"] = parallel_tool_calls
     # if presence_penalty is not None:
     #     kwargs["presence_penalty"] = presence_penalty
-    # if reasoning_effort is not None:
-    #     kwargs["reasoning_effort"] = reasoning_effort
+    if reasoning_effort is not None:
+        kwargs["extra_body"] = {"reasoning": {"effort": reasoning_effort}}
     # if response_format is not None:
     #     kwargs["response_format"] = response_format
     # if seed is not None:
@@ -122,8 +122,8 @@ def non_cached_chat_completion(
         kwargs["top_p"] = top_p
     # if logit_bias is not None:
     #     kwargs["logit_bias"] = logit_bias
-    # if thinking is not None:
-    #     kwargs["thinking"] = thinking
+    if thinking is not None:
+        kwargs["extra_body"] = {"thinking": thinking}
     # if base_url is not None:
     #     kwargs["base_url"] = base_url
     # if api_version is not None:
@@ -161,6 +161,12 @@ def non_cached_chat_completion(
             base_url="https://openrouter.ai/api/v1",
             api_key=api_key,
         )
+    elif provider.strip().lower() == "deepseek":
+        from openai import OpenAI
+        client = OpenAI(
+            base_url=os.environ.get("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1"),
+            api_key=os.environ.get("DEEPSEEK_API_KEY"),
+        )
     else:
         raise ValueError(
             f"Invalid provider: {provider}."
@@ -197,7 +203,7 @@ def cached_chat_completion(
     n: int | None = None,
     parallel_tool_calls: bool | None = None,
     presence_penalty: float | None = None,
-    reasoning_effort: Literal["low", "medium", "high"] | None = None,
+    reasoning_effort: Literal["none", "low", "medium", "high"] | None = None,
     response_format: dict | None = None,
     seed: int | None = None,
     stop: str | list[str] | None = None,

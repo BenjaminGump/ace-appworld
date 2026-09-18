@@ -5,8 +5,10 @@ local experiment_configs_path = project_home_path + "/experiments/configs";
 local experiment_code_path = project_home_path + "/experiments/code";
 
 local generator_model_config = {
-    "name": "qwen3.7-plus",
-    "provider": "openai",
+    "name": "deepseek-flash",
+    "provider": "deepseek",
+    "custom_llm_provider": "deepseek",
+    "thinking": {"type": "disabled"},
     "temperature": 0,
     "seed": 100,
     "stop": ["<|endoftext|>", "<|eot_id|>", "<|start_header_id|>"],
@@ -22,8 +24,10 @@ local generator_model_config = {
 };
 
 local reflector_model_config = {
-    "name": "qwen3.7-plus",
-    "provider": "openai",
+    "name": "deepseek-flash",
+    "provider": "deepseek",
+    "custom_llm_provider": "deepseek",
+    "thinking": {"type": "disabled"},
     "temperature": 0,
     "seed": 100,
     "stop": ["<|endoftext|>", "<|eot_id|>", "<|start_header_id|>"],
@@ -39,8 +43,10 @@ local reflector_model_config = {
 };
 
 local curator_model_config = {
-    "name": "qwen3.7-plus",
-    "provider": "openai",
+    "name": "deepseek-flash",
+    "provider": "deepseek",
+    "custom_llm_provider": "deepseek",
+    "thinking": {"type": "disabled"},
     "temperature": 0,
     "seed": 100,
     "stop": ["<|endoftext|>", "<|eot_id|>", "<|start_header_id|>"],
@@ -66,6 +72,7 @@ local curator_model_config = {
             "curator_model_config": curator_model_config,
             "appworld_config": {
                 "random_seed": 123,
+                "timeout_seconds": null,
             },
             "logger_config": {
                 "color": true,
@@ -73,9 +80,9 @@ local curator_model_config = {
             },
             "generator_prompt_file_path": experiment_prompts_path + "/appworld_react_generator_prompt_v2.txt",
             "reflector_prompt_file_path": experiment_prompts_path + "/appworld_react_reflector_no_gt_prompt.txt",
-            "curator_prompt_file_path": experiment_prompts_path + "/appworld_react_curator_prompt.txt", 
-            "initial_playbook_file_path": experiment_playbooks_path + "/appworld_initial_playbook.txt", 
-            "trained_playbook_file_path": experiment_playbooks_path + "/appworld_final_playbook.txt",  
+            "curator_prompt_file_path": experiment_prompts_path + "/appworld_react_curator_prompt.txt",
+            "initial_playbook_file_path": experiment_playbooks_path + "/appworld_empty_playbook.txt",
+            "trained_playbook_file_path": experiment_playbooks_path + "/appworld_final_playbook.txt",
             "ignore_multiple_calls": true,
             "max_steps": 40,
             "max_cost_overall": 1000,

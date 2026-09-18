@@ -132,6 +132,42 @@ If you find our work helpful, please use the following citation. Thank you for y
 ```
 
 
+## Quick Start: Current DeepSeek Setup
+
+The repository configs are now preconfigured for the tested DeepSeek setup:
+
+- API endpoint: `https://api.deepseek.com/v1`
+- Model: `deepseek-flash`
+- Provider: `deepseek`
+- Thinking: disabled
+- Initial adaptation experience: empty (`appworld_empty_playbook.txt`)
+- Training split: `train`
+- Evaluation split: `test_normal`
+- Evaluation uses the trained `appworld_final_playbook.txt`.
+
+After environment installation, only the API key needs to be set manually:
+
+```bat
+conda activate ace_env
+set "DEEPSEEK_API_KEY=YOUR_KEY"
+```
+
+Run training:
+
+```bat
+run_deepseek_train.cmd
+```
+
+After training completes, run test generation and evaluation:
+
+```bat
+run_deepseek_test.cmd
+```
+
+The `.cmd` scripts automatically set the project path, UTF-8 mode, API base URL, and other Windows runtime settings. No JSON override is required for the standard experiment.
+
+The longer section below documents the earlier manual/OpenRouter workflow and is retained only as historical debugging information.
+
 ## 7. Current tested Windows / OpenRouter reproduction
 
 The setup below is the currently tested local configuration for this repository.
@@ -159,7 +195,7 @@ On Windows, AppWorld experiments must use `timeout_seconds=null`, because the up
 The tested model is OpenRouter:
 
 ```text
-~deepseek/deepseek-v4-flash-latest
+deepseek/deepseek-v4-flash-0731
 ```
 
 The repository's current `provider="openai"` path is OpenAI-compatible and routes to OpenRouter in the customized ACE wrapper, so keep the provider unchanged and override only the model name.
@@ -187,7 +223,7 @@ The default upstream configuration still points to `appworld_initial_playbook.tx
 Use a separate smoke playbook so the test cannot contaminate the formal run:
 
 ```bat
-set "ACE_SMOKE_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"initial_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_empty_playbook.txt\",\"trained_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_smoke_playbook.txt\",\"generator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"reflector_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"curator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"max_steps\":3}}}"
+set "ACE_SMOKE_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"initial_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_empty_playbook.txt\",\"trained_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_smoke_playbook.txt\",\"generator_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"},\"reflector_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"},\"curator_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"},\"max_steps\":3}}}"
 appworld run ACE_offline_no_GT_adaptation --task-id 82e2fac_1 --override "%ACE_SMOKE_OVERRIDE%"
 ```
 
@@ -211,7 +247,7 @@ git restore --source=HEAD --worktree experiments\playbooks\appworld_final_playbo
 Set the formal override:
 
 ```bat
-set "ACE_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"initial_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_empty_playbook.txt\",\"generator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"reflector_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"curator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"}}}}"
+set "ACE_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"initial_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_empty_playbook.txt\",\"generator_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"},\"reflector_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"},\"curator_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"}}}}"
 ```
 
 Run the complete train split:
@@ -235,7 +271,7 @@ Do not delete this file after training; evaluation uses it.
 Evaluation uses the trained `appworld_final_playbook.txt`; it does not restart from the empty playbook and does not run reflector/curator adaptation.
 
 ```bat
-set "ACE_EVAL_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"generator_model_config\":{\"name\":\"~deepseek/deepseek-v4-flash-latest\"},\"trained_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_final_playbook.txt\"}}}"
+set "ACE_EVAL_OVERRIDE={\"config\":{\"agent\":{\"appworld_config\":{\"timeout_seconds\":null},\"generator_model_config\":{\"name\":\"deepseek/deepseek-v4-flash-0731\"},\"trained_playbook_file_path\":\"%REPO%/experiments/playbooks/appworld_final_playbook.txt\"}}}"
 appworld run ACE_offline_no_GT_evaluation --override "%ACE_EVAL_OVERRIDE%"
 appworld evaluate ACE_offline_no_GT_evaluation test_normal
 ```
@@ -256,7 +292,7 @@ Do not force-add the entire playbooks directory.
 
 ### 7.8 Known caveat: cost tracking
 
-The pinned LiteLLM version does not currently have token-cost metadata for `~deepseek/deepseek-v4-flash-latest`. Model calls work, but ACE may report `cost = 0.0`. Therefore `max_cost_per_task` and `max_cost_overall` should not be relied upon as actual spending guards; monitor OpenRouter usage separately.
+The pinned LiteLLM version does not currently have token-cost metadata for `deepseek/deepseek-v4-flash-0731`. Model calls work, but ACE may report `cost = 0.0`. Therefore `max_cost_per_task` and `max_cost_overall` should not be relied upon as actual spending guards; monitor OpenRouter usage separately.
 
 ### 7.9 Local compatibility/reproducibility fixes
 
